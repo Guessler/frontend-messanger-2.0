@@ -1,65 +1,32 @@
 'use client';
 import { StarfieldBackground } from '@/components/ui/starfield';
+import { registerSchema } from '@/feature/api/auth-schemes';
+import { apiFetch } from '@/feature/api/client';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeClosed } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import z from 'zod';
 
-export const registerSchema = z.object({
-  email: z.email('Некорректный email'),
-  password: z.string().min(1, 'Введите пароль'),
-});
 
 export default function RegisterPage() {
-  const mutationKey = ['register'];
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isVisible, setVisible] = useState(false)
-  const [csrfToken, setCsrfToken] = useState('');
-
-  useEffect(() => {
-    const getCsrfToken = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BACK}auth/csrf-token`,
-          {
-            credentials: 'include',
-          }
-        );
-        const data = await res.json();
-        setCsrfToken(data.csrfToken);
-      } catch (e) {
-        console.error('Failed to fetch CSRF-token', e);
-      }
-    };
-
-    getCsrfToken();
-  }, []);
-
 
   const registerMutation = useMutation({
-    mutationKey,
+    mutationKey: ['register'],
     mutationFn: async (data: { email: string; password: string }) => {
-      const res = await fetch(
+      const res = await apiFetch(
         `${process.env.NEXT_PUBLIC_API_BACK}auth/register`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfToken,
-          },
-          credentials: 'include',
           body: JSON.stringify(data),
         }
       );
 
-      if (!res.ok) {
-        throw new Error('Ошибка регистрации');
-      }
-
+      if (!res.ok) throw new Error('Ошибка');
       return res.json();
     },
 
@@ -76,11 +43,6 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!csrfToken) {
-      toast.error('Загрузка...');
-      return;
-    }
 
     const result = registerSchema.safeParse({
       email,
