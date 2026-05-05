@@ -41,6 +41,10 @@ export default function RegisterPage() {
     },
   });
 
+  const handleGoogleRegister = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BACK}auth/google`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -155,6 +159,7 @@ export default function RegisterPage() {
               hover:bg-white/15
               active:scale-[0.98]
             "
+            onClick={handleGoogleRegister}
           >
             <Image
               src="/svg/google-icon-logo.svg"
