@@ -1,19 +1,24 @@
-let csrfToken: string | null = null;
+const CSRF_KEY = 'csrf_token';
 
-export const getCsrfToken = async () => {
-  if (csrfToken) return csrfToken;
+export const getCsrfToken = async (): Promise<string> => {
+  // 1. Берём из sessionStorage если есть
+  const cached = sessionStorage.getItem(CSRF_KEY);
+  if (cached) return cached;
 
+  // 2. Иначе запрашиваем один раз
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BACK}auth/csrf-token`,
-    {
-      credentials: 'include',
-    }
+    { credentials: 'include' }
   );
 
-  const data = await res.json();
-  csrfToken = data.csrfToken;
+  if (!res.ok) throw new Error('Не удалось получить CSRF токен');
 
-  return csrfToken;
+  const data = await res.json();
+  const token: string = data.csrfToken;
+
+  sessionStorage.setItem(CSRF_KEY, token);
+
+  return token;
 };
 
 export const apiFetch = async (input: RequestInfo, init?: RequestInit) => {
@@ -24,8 +29,8 @@ export const apiFetch = async (input: RequestInfo, init?: RequestInit) => {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRF-Token': token!,
-      ...(init?.headers || {}),
+      'X-CSRF-Token': token,
+      ...(init?.headers ?? {}),
     },
   });
 };

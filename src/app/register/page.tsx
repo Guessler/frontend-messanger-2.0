@@ -8,12 +8,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isVisible, setVisible] = useState(false)
+
+  const router = useRouter();
 
   const registerMutation = useMutation({
     mutationKey: ['register'],
@@ -34,6 +37,7 @@ export default function RegisterPage() {
       toast.success('Регистрация успешна!');
       setPassword('');
       setEmail('');
+      router.push('/profile')
     },
 
     onError: () => {

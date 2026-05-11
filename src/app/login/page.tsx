@@ -6,12 +6,16 @@ import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeClosed } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isVisible, setVisible] = useState(false)
+
+  const router = useRouter();
+
 
   const loginMutation = useMutation({
     mutationKey: ['login'],
@@ -28,6 +32,7 @@ export default function LoginPage() {
       toast.success('Атворизация успешна!')
       setEmail('')
       setPassword('')
+      router.push('/profile')
     },
 
     onError: () => {
