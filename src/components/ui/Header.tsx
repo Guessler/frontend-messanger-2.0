@@ -1,6 +1,27 @@
+'use client'
 import { MessageCircleOff, Search, Trash } from "lucide-react"
-
+import { useState, useRef, useEffect } from "react";
 export const Header = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const inputRef = useRef(null);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (isOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     return (
         <div className="w-full flex justify-between h-20 bg-white/5 text-white backdrop-blur-md py-2 px-4 space-y-4 transition-all duration-300 overflow-hidden">
             <div className="flex gap-4">
@@ -13,8 +34,20 @@ export const Header = () => {
                 </div>
             </div>
             <div className="flex gap-4">
-                <div className="flex w-15 h-15 items-center justify-center cursor-pointer shrink-0 rounded-full shadow-2xl shadow-black/40 bg-white/5 backdrop-blur-md border border-white/10">
-                    <Search />
+                <div
+                    ref={containerRef}
+                    onClick={() => setIsOpen((prev) => !prev)}
+                    className={`relative flex items-center h-15 ${isOpen ? 'w-75' : 'w-15'} transition-all duration-300 rounded-full shadow-2xl shadow-black/40 bg-white/5 backdrop-blur-md border border-white/10 cursor-pointer`}
+                >
+                    <div className="flex w-15 h-15 shrink-0 items-center justify-center rounded-full border border-white/10">
+                        <Search />
+                    </div>
+                    <input
+                        ref={inputRef}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Search..."
+                        className={`outline-none bg-transparent h-full w-full pr-4 pl-2 text-white transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    />
                 </div>
                 <div className="flex w-15 h-15 items-center justify-center cursor-pointer shrink-0 rounded-full shadow-2xl shadow-black/40 bg-white/5 backdrop-blur-md border border-white/10">
                     <MessageCircleOff />
